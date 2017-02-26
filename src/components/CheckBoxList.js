@@ -19,9 +19,9 @@ class CheckboxListItem extends Component {
     const value = this.props.value;
     const checked = this.props.checked;
     return (
-      <li>
+      <li className="CheckboxListItem">
         <label>
-          {value}
+          <span>{value}</span>
           <input 
             type="checkbox" 
             value={value} 
@@ -39,7 +39,7 @@ class CheckboxList extends Component {
   render() {
     const items = this.props.items;
     return (
-      <ul>
+      <ul className="CheckboxList">
         {items.map((item) => 
             <CheckboxListItem 
               key={item.name} 

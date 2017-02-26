@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import React, { Component } from 'react';
+import LazyLoad from 'react-lazyload';
 
 import CONFIG from '../config';
 
@@ -21,8 +22,28 @@ function ArticleSummary(props) {
     return (<p>{props.text}</p>)
 }
 
+function Loader(props) {
+    return (
+        <div className="lazyPlaceholder">
+            <div className="loader">
+                <span className="dot dot_1"></span>
+                <span className="dot dot_2"></span>
+                <span className="dot dot_3"></span>
+                <span className="dot dot_4"></span>
+            </div>
+        </div>
+    )
+}
+
 function ArticleThumb(props) {
-    return (<img src={props.src} alt={props.alt} />)
+    let placeholder = <Loader />
+    return (
+        <div className="ArticleThumb">
+            <LazyLoad height={200} overflow={true} placeholder={placeholder}>
+                <img src={props.src} alt={props.alt} />
+            </LazyLoad>
+        </div>
+    )
 }
 
 class ArticleCard extends Component {
@@ -34,10 +55,12 @@ class ArticleCard extends Component {
         this.expandArticle = this.expandArticle.bind(this);
     }
 
-    expandArticle() {
+    expandArticle(evt) {
+        evt.preventDefault();
         axios.get(CONFIG.base_url + '/diffbot.json', {
             params: {
-                url: this.props.article.original
+                url: this.props.article.original,
+                _: new Date().getTime()
             }
         })
         .then(resp => {
@@ -50,19 +73,23 @@ class ArticleCard extends Component {
         let article = this.props.article;
         return (
             <article>
-                <ArticleTitle text={article.title} url={article.original} />
                 {
                     article.thumbnail ? 
                     <ArticleThumb src={article.thumbnail} alt={article.title} /> 
                     : null
                 }                 
-                <br />
+                <ArticleTitle text={article.title} url={article.original} />
                 <ArticleSource text={article.source} time={article.date} />
-                <ArticleSummary text={article.description} />
+                {
+                    this.state.fulltext ? <br /> :
+                    <ArticleSummary text={article.description} />
+                }
                 {
                     this.state.fulltext ? 
-                    this.state.fulltext
-                    : <button onClick={this.expandArticle}>Citește articolul complet</button>
+                    this.state.fulltext : 
+                    <a href={article.original} onClick={this.expandArticle} target="_blank">
+                        Citește articolul complet
+                    </a>
                 }
                 
             </article>

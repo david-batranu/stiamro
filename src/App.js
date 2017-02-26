@@ -3,12 +3,14 @@ import axios from 'axios';
 import React, { Component } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 
-import CheckboxList from './components/CheckBoxList';
 import ArticleCard from './components/ArticleCard';
+import Filters from './components/Filters';
+
 
 import CONFIG from './config';
 
 import './App.css';
+import './Loader.css';
 
 
 function convertForCheckboxes(items) {
@@ -65,6 +67,7 @@ class App extends Component {
     axios.get(CONFIG.base_url + '/query.json', {
       params: {
         b_start,
+        _: new Date().getTime(),
         c4: state.categories.filter(
           category => category.selected
         ).map(category => category.name),
@@ -92,12 +95,16 @@ class App extends Component {
   }
 
   componentDidMount() {
-    axios.get(CONFIG.base_url + '/app.json')
-      .then(resp => {
-        const categories = convertForCheckboxes(resp.data.categories.items);
-        const sources = convertForCheckboxes(resp.data.sources.items);
-        this.setState({categories, sources})
-      });
+    axios.get(CONFIG.base_url + '/app.json', {
+      params: {
+        _: new Date().getTime()
+      }
+    })
+    .then(resp => {
+      const categories = convertForCheckboxes(resp.data.categories.items);
+      const sources = convertForCheckboxes(resp.data.sources.items);
+      this.setState({categories, sources})
+    });
     this.loadArticles();
   }
 
@@ -109,15 +116,16 @@ class App extends Component {
     )
     return (
       <div className="App">
-        <div className="App-filters">
-          <CheckboxList items={this.state.categories} onChange={this.handleCategoryChange} />
-          <CheckboxList items={this.state.sources} onChange={this.handleSourcesChange} />
-        </div>
-        <div className="App-articles">
+        <Filters 
+          categories={this.state.categories} 
+          sources={this.state.sources} 
+          handleCategoryChange={this.handleCategoryChange}
+          handleSourcesChange={this.handleSourcesChange}>
           <InfiniteScroll
             pageStart={0}
             loadMore={this.loadArticles}
             hasMore={hasMoreArticles}
+            useWindow={false}
             loader="LOADING">
             {
               articles.map((article, idx) =>
@@ -125,10 +133,7 @@ class App extends Component {
               )
             }
           </InfiniteScroll>
-        </div>
-        <div className="Settings">
-          Settings
-        </div>
+        </Filters>
       </div>
     );
   }

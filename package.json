@@ -12,7 +12,9 @@
     "axios": "^0.15.3",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
-    "react-infinite-scroller": "^1.0.7"
+    "react-infinite-scroller": "^1.0.7",
+    "react-lazyload": "^2.2.4",
+    "react-sidebar": "^2.3.0"
   },
   "scripts": {
     "start": "react-scripts start",
